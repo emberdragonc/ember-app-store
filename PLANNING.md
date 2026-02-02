@@ -77,7 +77,8 @@ Featured/Premium last 7 days, can be renewed after expiry.
 
 | Item | Address | Chain |
 |------|---------|-------|
-| EmberAppStore | TBD | Base Mainnet |
+| EmberAppStore (testnet) | 0xaf5894aBDeeFA800a0D1c01502d3D6691263DeBa | Base Sepolia |
+| EmberAppStore (mainnet) | TBD | Base Mainnet |
 | EMBER Token | 0x1b6A569DD61EdCe3C383f30E32b7A489E8441B09 | Base |
 | Staking Contract | TBD (EmberStaking) | Base |
 
@@ -85,8 +86,8 @@ Featured/Premium last 7 days, can be renewed after expiry.
 
 - [x] Contract written
 - [x] Tests passing (24)
-- [ ] Self-audit 3x
-- [ ] Deploy testnet
+- [x] Self-audit 3x (AUDIT_STATUS.md created)
+- [x] Deploy testnet (Base Sepolia)
 - [ ] Frontend MVP
 - [ ] Deploy mainnet
 - [ ] Announce on X

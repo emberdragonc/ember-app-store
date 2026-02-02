@@ -101,6 +101,12 @@
 
 **Ready for testnet deploy: YES ✅**
 
+## Testnet Deployment - 2026-02-02
+- **Chain**: Base Sepolia (84532)
+- **Contract**: `0xaf5894aBDeeFA800a0D1c01502d3D6691263DeBa`
+- **Blockscout**: https://base-sepolia.blockscout.com/address/0xaf5894abdeefa800a0d1c01502d3d6691263deba
+- **Verified**: ✅
+
 ---
 
 ## Summary
