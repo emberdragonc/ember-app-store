@@ -46,6 +46,9 @@ contract EmberAppStore is Ownable2Step, ReentrancyGuard {
     /// @notice Featured/Premium duration
     uint256 public constant FEATURE_DURATION = 7 days;
 
+    /// @notice Fallback price: $0.001 per EMBER = 0.1 cents with 8 decimals
+    uint256 public constant FALLBACK_PRICE = 10000000;
+
     // ============ Errors ============
 
     error AppNotFound();
@@ -78,6 +81,7 @@ contract EmberAppStore is Ownable2Step, ReentrancyGuard {
     event StakerRewards(uint256 amount);
     event PriceFeedUpdated(address indexed newFeed);
     event StakingContractUpdated(address indexed newContract);
+    event ManualPriceUpdated(uint256 newPrice);
 
     // ============ Structs ============
 
@@ -339,6 +343,7 @@ contract EmberAppStore is Ownable2Step, ReentrancyGuard {
      */
     function setManualPrice(uint256 priceInCentsPerEmber) external onlyOwner {
         manualPriceOverride = priceInCentsPerEmber;
+        emit ManualPriceUpdated(priceInCentsPerEmber);
     }
 
     // ============ View Functions ============
@@ -370,13 +375,12 @@ contract EmberAppStore is Ownable2Step, ReentrancyGuard {
         }
         
         if (priceFeed == address(0)) {
-            // Default fallback price: $0.001 per EMBER = 0.1 cents = 10000000 (8 decimals)
-            return 10000000;
+            return FALLBACK_PRICE;
         }
 
         // TODO: Implement actual oracle call (Chainlink/Pyth)
         // For now, return fallback
-        return 10000000; // $0.001 per EMBER
+        return FALLBACK_PRICE;
     }
 
     /**
@@ -427,9 +431,11 @@ contract EmberAppStore is Ownable2Step, ReentrancyGuard {
         uint256 offset,
         uint256 limit
     ) external view returns (bytes32[] memory) {
+        uint256 len = allAppIds.length; // Cache array length
+        
         // Count matching apps first
         uint256 matchCount = 0;
-        for (uint256 i = 0; i < allAppIds.length; i++) {
+        for (uint256 i = 0; i < len; i++) {
             if (apps[allAppIds[i]].status == status) {
                 matchCount++;
             }
@@ -449,7 +455,7 @@ contract EmberAppStore is Ownable2Step, ReentrancyGuard {
         uint256 found = 0;
         uint256 added = 0;
 
-        for (uint256 i = 0; i < allAppIds.length && added < resultCount; i++) {
+        for (uint256 i = 0; i < len && added < resultCount; i++) {
             if (apps[allAppIds[i]].status == status) {
                 if (found >= offset) {
                     result[added] = allAppIds[i];
