@@ -1,11 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useConnect, useDisconnect, useReadContract } from 'wagmi'
-import { formatEther } from 'viem'
-import { CONTRACTS, CATEGORIES, AUDIENCES } from '@/lib/wagmi'
-import { appStoreAbi } from '@/lib/abi'
-import { baseSepolia } from 'wagmi/chains'
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { CATEGORIES, AUDIENCES } from '@/lib/wagmi'
 
 // Sample apps for display (will be replaced with contract data)
 const SAMPLE_APPS = [
@@ -103,57 +100,72 @@ function AppCard({ app, featured = false }: { app: typeof SAMPLE_APPS[0], featur
   )
 }
 
-function StatCard({ value, label, icon }: { value: string; label: string; icon: React.ReactNode }) {
+function FeaturedCarousel() {
+  const featuredApps = SAMPLE_APPS.filter(app => app.featured)
+  
+  if (featuredApps.length === 0) return null
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
-          {icon}
-        </div>
-        <div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
-        </div>
+    <div className="mb-10">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+        Featured Apps
+      </h2>
+      <div className="grid md:grid-cols-2 gap-4">
+        {featuredApps.map(app => {
+          const category = CATEGORIES.find(c => c.id === app.category)
+          const audience = AUDIENCES.find(a => a.id === app.audience)
+          
+          return (
+            <a
+              key={app.id}
+              href={app.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-[2px] shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 h-full">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-xl text-4xl">
+                    {app.iconUrl || '📦'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-xl text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {app.name}
+                      </h3>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        Featured
+                      </span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+                      {app.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <span className="inline-flex items-center text-xs px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-md font-medium">
+                        {category?.emoji} {category?.name}
+                      </span>
+                      <span className="inline-flex items-center text-xs px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-md font-medium">
+                        {audience?.emoji} {audience?.name}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </a>
+          )
+        })}
       </div>
-    </div>
-  )
-}
-
-function Stats() {
-  const { data: totalApps } = useReadContract({
-    address: CONTRACTS.appStore[baseSepolia.id],
-    abi: appStoreAbi,
-    functionName: 'totalApps',
-  })
-
-  const { data: totalBurned } = useReadContract({
-    address: CONTRACTS.appStore[baseSepolia.id],
-    abi: appStoreAbi,
-    functionName: 'totalBurned',
-  })
-
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-      <StatCard 
-        value={totalApps?.toString() || '1'} 
-        label="Apps Listed"
-        icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>}
-      />
-      <StatCard 
-        value={totalBurned ? Number(formatEther(totalBurned)).toLocaleString() : '0'} 
-        label="EMBER Burned"
-        icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /></svg>}
-      />
-      <StatCard 
-        value="$10" 
-        label="Listing Fee"
-        icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-      />
-      <StatCard 
-        value="100%" 
-        label="Fee Burned"
-        icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>}
-      />
     </div>
   )
 }
@@ -219,8 +231,8 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
-        {/* Stats Cards */}
-        <Stats />
+        {/* Featured Carousel */}
+        <FeaturedCarousel />
 
         {/* Filters Section */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
@@ -252,14 +264,11 @@ export default function Home() {
                 Audience
               </label>
               <div className="flex flex-wrap gap-2">
-                <FilterPill active={selectedAudience === null} onClick={() => setSelectedAudience(null)}>
-                  All
-                </FilterPill>
                 {AUDIENCES.map(aud => (
                   <FilterPill 
                     key={aud.id} 
-                    active={selectedAudience === aud.id} 
-                    onClick={() => setSelectedAudience(aud.id)}
+                    active={selectedAudience === aud.id || (selectedAudience === null && aud.id === 0)} 
+                    onClick={() => setSelectedAudience(aud.id === 0 ? null : aud.id)}
                   >
                     {aud.emoji} {aud.name}
                   </FilterPill>
