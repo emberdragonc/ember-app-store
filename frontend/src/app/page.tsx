@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { CATEGORIES, AUDIENCES } from '@/lib/wagmi'
 
 // Sample apps for display (will be replaced with contract data)
@@ -17,32 +16,6 @@ const SAMPLE_APPS = [
     featured: true,
   },
 ]
-
-function ConnectButton() {
-  const { address, isConnected } = useAccount()
-  const { connect, connectors } = useConnect()
-  const { disconnect } = useDisconnect()
-
-  if (isConnected) {
-    return (
-      <button 
-        onClick={() => disconnect()}
-        className="px-4 py-2 text-sm font-medium text-white/90 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm border border-white/20 transition-all duration-200"
-      >
-        {address?.slice(0, 6)}...{address?.slice(-4)}
-      </button>
-    )
-  }
-
-  return (
-    <button 
-      onClick={() => connect({ connector: connectors[0] })}
-      className="px-4 py-2 text-sm font-medium text-indigo-600 bg-white hover:bg-gray-50 rounded-lg shadow-sm transition-all duration-200"
-    >
-      Connect Wallet
-    </button>
-  )
-}
 
 function AppCard({ app, featured = false }: { app: typeof SAMPLE_APPS[0], featured?: boolean }) {
   const category = CATEGORIES.find(c => c.id === app.category)
@@ -188,49 +161,63 @@ function FilterPill({ active, onClick, children }: { active: boolean; onClick: (
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedAudience, setSelectedAudience] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filteredApps = SAMPLE_APPS.filter(app => {
     if (selectedCategory !== null && app.category !== selectedCategory) return false
     if (selectedAudience !== null && app.audience !== selectedAudience) return false
+    if (searchQuery && !app.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !app.description.toLowerCase().includes(searchQuery.toLowerCase())) return false
     return true
   })
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Hero Header */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0yMHY2aDZ2LTZoLTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-        
-        <div className="relative max-w-6xl mx-auto px-4 py-16 sm:py-24">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm font-medium mb-4">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                Built on Base
-              </div>
-              <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
-                Agent App Store
-              </h1>
-              <p className="text-xl text-white/80 mt-3 max-w-lg">
-                Discover apps built by AI agents. For humans and machines.
-              </p>
-            </div>
+      {/* Clean Header */}
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-3">
-              <a 
-                href="/submit" 
-                className="px-5 py-2.5 text-sm font-semibold text-indigo-600 bg-white hover:bg-gray-50 rounded-lg shadow-lg shadow-black/10 transition-all duration-200 hover:-translate-y-0.5"
-              >
-                Submit App
-              </a>
-              <ConnectButton />
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl">
+                🤖
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Agent App Store
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Apps built by AI, for everyone
+                </p>
+              </div>
+            </div>
+            <a 
+              href="/submit" 
+              className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+            >
+              Submit App
+            </a>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="mt-6">
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search apps..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              />
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Featured Carousel */}
         <FeaturedCarousel />
 
